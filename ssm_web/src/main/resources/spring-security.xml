@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security.xsd
+">
+
+
+    <!--配置资源不拦截-->
+    <security:http pattern="/css/**" security="none"></security:http>
+    <security:http pattern="/img/**" security="none"></security:http>
+    <security:http pattern="/plugins/**" security="none"></security:http>
+    <!--谷歌浏览器：请求被拦截会自动访问favicon.ico-->
+    <security:http pattern="/favicon.ico" security="none"></security:http>
+    <!--配置页面不拦截
+        pattern="" : 拦截的路径表达式
+        security="none":不拦截
+    -->
+    <security:http pattern="/pages/login.jsp" security="none"></security:http>
+    <security:http pattern="/failer.jsp" security="none"></security:http>
+    <!--
+        配置拦截的规则
+        auto-config="使用自带的页面"
+        use-expressions="是否使用spel表达式"，如果使用表达式：hasRole('ROLE_USER')
+        -->
+    <security:http auto-config="true" use-expressions="true">
+        <!-- 配置拦截的请求地址，任何请求地址都必须有ROLE_USER的权限 -->
+        <security:intercept-url pattern="/**" access="hasAnyRole('ROLE_USER','ROLE_ADMIN')"/>
+
+        <security:form-login login-page="/pages/login.jsp"
+                             login-processing-url="/pages/login"
+                             default-target-url="/index.jsp"
+                             authentication-failure-url="/pages/login.jsp"></security:form-login>
+        <!--关闭跨站请求伪造-->
+        <security:csrf disabled="true"></security:csrf>
+        <!--退出登录-->
+        <security:logout logout-success-url="/pages/login.jsp" logout-url="/logout" invalidate-session="true"></security:logout>
+        <security:access-denied-handler error-page="/failer.jsp"></security:access-denied-handler>
+    </security:http>
+    <!-- 配置认证信息 -->
+    <security:authentication-manager>
+        <security:authentication-provider user-service-ref="userServiceImpl">
+           <!-- <security:user-service>
+                <security:user name="admin" password="{noop}admin" authorities="ROLE_USER"/>
+            </security:user-service>-->
+            <!--通知认证对象使用密码加密工具-->
+            <security:password-encoder ref="passwordEncoder"></security:password-encoder>
+        </security:authentication-provider>
+    </security:authentication-manager>
+
+    <!--配置加密类-->
+    <bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"></bean>
+</beans>

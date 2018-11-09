@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       http://www.springframework.org/schema/security
+       http://www.springframework.org/schema/security/spring-security.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+">
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/pages/"></property>
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+
+    <!--注解驱动:引入类型转化器-->
+    <mvc:annotation-driven conversion-service="conversionService"></mvc:annotation-driven>
+    <context:component-scan base-package="com.itheima">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"></context:include-filter>
+    </context:component-scan>
+
+
+    <mvc:default-servlet-handler></mvc:default-servlet-handler>
+
+    <!--自定义类型转换器-->
+    <bean id="conversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <set>
+                <bean class="com.itheima.converter.StringToDateConverter"></bean>
+            </set>
+        </property>
+
+    </bean>
+    <!--6. 静态资源放行-->
+    <mvc:default-servlet-handler></mvc:default-servlet-handler>
+
+    <!--配置开启security的注解支持-->
+    <security:global-method-security secured-annotations="enabled"/>
+
+    <!--aop的自动代理
+        其中proxy-target-class设置为true代表目标类的代理对象不需要借助于接口
+        即使用cglib基于子类生成目标对象的代理对象
+      -->
+    <aop:aspectj-autoproxy proxy-target-class="true"></aop:aspectj-autoproxy>
+
+</beans>
